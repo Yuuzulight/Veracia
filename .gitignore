@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+dist/
+build/
+
+# generated reports are regenerable, not source
+reports/*.md
+reports/*.html
+!reports/.gitkeep
+
+.env
+
+# local planning notes, not part of the project
+docs/superpowers/
