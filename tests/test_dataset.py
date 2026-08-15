@@ -50,3 +50,26 @@ def test_empty_file_returns_empty_list(tmp_path):
     path = _write(tmp_path, "empty.jsonl", [])
 
     assert load_dataset(path, required_fields=["text"]) == []
+
+
+def test_skips_blank_lines_between_cases(tmp_path):
+    path = _write(
+        tmp_path,
+        "cases.jsonl",
+        ['{"text": "hello", "label": "human"}', "", "  ", '{"text": "world", "label": "ai"}'],
+    )
+
+    cases = load_dataset(path, required_fields=["text", "label"])
+
+    assert len(cases) == 2
+
+
+def test_raises_on_malformed_json(tmp_path):
+    path = _write(tmp_path, "cases.jsonl", ['{"text": "hello", "label": "human"}', "{not valid json"])
+
+    with pytest.raises(DatasetError) as exc_info:
+        load_dataset(path, required_fields=["text", "label"])
+
+    message = str(exc_info.value)
+    assert "line 2" in message or ":2:" in message
+    assert "invalid JSON" in message

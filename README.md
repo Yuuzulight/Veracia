@@ -22,19 +22,21 @@ veracia/
     └── veritarach_classifier/  # confusion matrix, generalization, adversarial checks
 ```
 
-The runner (`core/runner.py`) doesn't know anything about RAG or classification. It takes a `predict_fn`, a dataset, and a plugin, and for every case it calls `predict_fn(case)` then hands the result to `plugin.score()`. All the project-specific logic — what counts as correct, what the summary stats look like — lives in the plugin. `core/report.py` turns the scored results into a markdown report without caring which plugin produced them.
+The runner (`core/runner.py`) doesn't know anything about RAG or classification. It takes a `predict_fn`, a dataset, and a plugin, and for every case it calls `predict_fn(case["input"])` then hands the result to `plugin.score()`. All the project-specific logic — what counts as correct, what the summary stats look like — lives in the plugin. `core/report.py` turns the scored results into a markdown report without caring which plugin produced them.
 
 ```python
 from veracia.core.runner import Runner
 from veracia.core.dataset import load_dataset
 from veracia.core.report import render_markdown
+from veracia.plugins.veritarach_classifier.client import predict
 from veracia.plugins.veritarach_classifier.metrics import VeritarachClassifierPlugin
 
-dataset = load_dataset("datasets/veritarach_holdout_test.jsonl", required_fields=["text", "label"])
-runner = Runner(predict_fn=call_veritarach_api, metric_plugin=VeritarachClassifierPlugin())
+dataset = load_dataset("datasets/veritarach_holdout_test.jsonl", required_fields=["input", "label"])
+plugin = VeritarachClassifierPlugin()
+runner = Runner(predict_fn=predict, metric_plugin=plugin)
 results = runner.run(dataset)
 
-render_markdown(results, VeritarachClassifierPlugin().aggregate(results), name="Veritarach holdout", path="reports/veritarach_holdout.md")
+render_markdown(results, plugin.aggregate(results), name="Veritarach holdout", path="reports/veritarach_holdout.md")
 ```
 
 ## The two plugins
@@ -48,6 +50,10 @@ render_markdown(results, VeritarachClassifierPlugin().aggregate(results), name="
 
 Veritarach's own repo doesn't ship a held-out dataset (the training data is gitignored and lives only on the box it was trained on), so the holdout set here is Veracia's own, built independently rather than reused. If anything that's a stronger check — it means the 99.65% F1 Veritarach reports gets verified against data it never bootstrapped its own number from.
 
+## What it found
+
+All three Veritarach checks are run for real against the live deployment, not just fixtures — see [docs/examples](docs/examples). Short version: the 99.65% F1 figure doesn't hold up independently. Real F1 against Veracia's holdout is 0.62, and confidence sits within a ~0.2-wide band of the decision boundary across effectively every case tested, including ones that aren't ambiguous at all. Accuracy against a model outside the training mix drops to 8%. Full writeup, numbers, and what's actually happening (rather than just "it went down") are in the linked reports.
+
 ## Running it
 
 ```bash
@@ -55,8 +61,8 @@ pip install -e ".[dev]"
 pytest
 ```
 
-Reports land in `reports/` and aren't checked in — they're regenerated from whatever dataset and prediction function you point the runner at. Example reports are linked from `docs/` once there's something worth linking.
+Reports land in `reports/` and aren't checked in — they're regenerated from whatever dataset and prediction function you point the runner at. `scripts/` has the generation scripts used to build the checked-in example reports and datasets.
 
 ## Status
 
-Early. Core interface and both plugins are being built out issue by issue — see the [issue tracker](https://github.com/Yuuzulight/Veracia/issues) for what's done and what's next.
+Core interface and both plugins are built: runner, report generator, dataset loader, the Hecate RAG plugin, and Veritarach's confusion matrix, generalization, and adversarial checks. See the [issue tracker](https://github.com/Yuuzulight/Veracia/issues) for history. Still open: a live Hecate report (needs an actual Hecate deployment to run against), and whatever comes out of following up on the generalization gap above.
