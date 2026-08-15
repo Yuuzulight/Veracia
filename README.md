@@ -48,11 +48,11 @@ render_markdown(results, plugin.aggregate(results), name="Veritarach holdout", p
 - A cross-model generalization check — new samples from a model that had no part in Veritarach's training mix (Claude, GPT-4o, and Gemini, per its training pipeline), to see whether accuracy holds up on writing style the model has never seen before.
 - An adversarial pass — light paraphrasing of already-correctly-classified samples, to see how much confidence degrades under realistic evasion rather than synthetic noise.
 
-Veritarach's own repo doesn't ship a held-out dataset (the training data is gitignored and lives only on the box it was trained on), so the holdout set here is Veracia's own, built independently rather than reused. If anything that's a stronger check — it means the 99.65% F1 Veritarach reports gets verified against data it never bootstrapped its own number from.
+Veritarach's own repo doesn't ship a held-out dataset (the training data is gitignored and lives only on the box it was trained on), so the holdout set here is Veracia's own, built independently rather than reused. If anything that's a stronger check — it means the F1 Veritarach reports gets verified against data it never bootstrapped its own number from.
 
 ## What it found
 
-All three Veritarach checks are run for real against the live deployment, not just fixtures — see [docs/examples](docs/examples). Short version: the 99.65% F1 figure doesn't hold up independently. Real F1 against Veracia's holdout is 0.62, and confidence sits within a ~0.2-wide band of the decision boundary across effectively every case tested, including ones that aren't ambiguous at all. Accuracy against a model outside the training mix drops to 8%. Full writeup, numbers, and what's actually happening (rather than just "it went down") are in the linked reports.
+All three Veritarach checks are run for real against the live deployment, not just fixtures — see [docs/examples](docs/examples). Short version, current as of Veritarach's 2026-08-15 retrain: the 99.86% F1 figure is real on Veritarach's own training distribution (independently confirmed), but doesn't transfer outside it. Against Veracia's holdout, recall on the `ai_generated` class is 0.042 — the model now calls almost everything human-written, confidently (0.98+), rather than sitting near the decision boundary the way an earlier, differently-broken checkpoint did. Full numbers and what changed between the two runs are in the linked reports — worth reading the actual writeup rather than just the summary, since "the number went down" and "the number is high but the failure mode got worse" are very different findings and this is the second one.
 
 ## Running it
 
