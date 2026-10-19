@@ -52,7 +52,7 @@ Veritarach's own repo doesn't ship a held-out dataset (the training data is giti
 
 ## What it found
 
-All three Veritarach checks are run for real against the live deployment, not just fixtures — see [docs/examples](docs/examples). Short version, current as of Veritarach's 2026-08-15 retrain: the 99.86% F1 figure is real on Veritarach's own training distribution (independently confirmed), but doesn't transfer outside it. Against Veracia's holdout, recall on the `ai_generated` class is 0.042 — the model now calls almost everything human-written, confidently (0.98+), rather than sitting near the decision boundary the way an earlier, differently-broken checkpoint did. Full numbers and what changed between the two runs are in the linked reports — worth reading the actual writeup rather than just the summary, since "the number went down" and "the number is high but the failure mode got worse" are very different findings and this is the second one.
+All three Veritarach checks were run for real against its live deployment (since retired, on 2026-09-09), not just fixtures — see [docs/examples](docs/examples). Short version, current as of Veritarach's 2026-08-15 retrain: the 99.86% F1 figure is real on Veritarach's own training distribution (independently confirmed), but doesn't transfer outside it. Against Veracia's holdout, recall on the `ai_generated` class is 0.042 — the model now calls almost everything human-written, confidently (0.98+), rather than sitting near the decision boundary the way an earlier, differently-broken checkpoint did. Full numbers and what changed between the two runs are in the linked reports — worth reading the actual writeup rather than just the summary, since "the number went down" and "the number is high but the failure mode got worse" are very different findings and this is the second one.
 
 ## Running it
 
@@ -65,4 +65,4 @@ Reports land in `reports/` and aren't checked in — they're regenerated from wh
 
 ## Status
 
-Core interface and both plugins are built: runner, report generator, dataset loader, the Hecate RAG plugin, and Veritarach's confusion matrix, generalization, and adversarial checks. See the [issue tracker](https://github.com/Yuuzulight/Veracia/issues) for history. Still open: a live Hecate report (needs an actual Hecate deployment to run against), and whatever comes out of following up on the generalization gap above.
+Core interface and both plugins are built: runner, report generator, dataset loader, the Hecate RAG plugin, and Veritarach's confusion matrix, generalization, and adversarial checks. See the [issue tracker](https://github.com/Yuuzulight/Veracia/issues) for history. Still open: a live Hecate report (now possible, since Hecate has run on AWS since 14 October 2026; it has not been run yet), and whatever comes out of following up on the generalization gap above.
